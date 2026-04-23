@@ -1,1 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dr. J's Methodology Architect</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Oswald:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap');
 
+:root{
+  --bg:#101317;
+  --panel:#f4f0e8;
+  --panel-soft:#f2efe9;
+  --ink:#111827;
+  --muted:#6b7280;
+  --maroon:#7a0013;
+  --maroon-dark:#5a0010;
+  --umsl-red:#ba0c2f;
+  --gold:#eaab00;
+  --blue:#0b325c;
+  --blue-accent:#0d4f8b;
+  --green:#166534;
+  --green-soft:#edf8f0;
+  --border:#d7cfc2;
+  --shadow:0 18px 34px rgba(0,0,0,.18);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:#fff;
+  font-family:"Lora",serif;
+}
+.page{
+  max-width:1520px;
+  margin:0 auto;
+  padding:18px;
+  display:grid;
+  gap:20px;
+}
+.card,.hero,.site-nav{
+  border-radius:26px;
+  box-shadow:var(--shadow);
+}
+.site-nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+  background:#171b21;
+  padding:14px 18px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.brand{
+  font-family:"Oswald",sans-serif;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-size:1.1rem;
+}
+.nav-links{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.nav-link{
+  display:inline-block;
+  text-decoration:none;
+  padding:10px 14px;
+  border-radius:14px;
+  font-family:"Roboto",sans-serif;
+  font-weight:700;
+  background:#fff;
+  color:#111827;
+  border:1px solid var(--border);
+}
+.nav-link.active{background:var(--gold)}
+.hero{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(90deg,var(--maroon) 0%,var(--umsl-red) 50%,var(--maroon-dark) 100%);
+  padding:30px;
+}
+.hero:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:.16;
+  background-image:
+    radial-gradient(circle at 18% 22%,#ffffff 0,transparent 21%),
+    radial-gradient(circle at 84% 26%,#eaab00 0,transparent 17%),
+    radial-gradient(circle at 82% 76%,#ffffff 0,transparent 18%);
+}
+.hero-inner{
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+.eyebrow,.body-font,.small,.helper{
+  font-family:"Roboto",sans-serif;
+}
+.eyebrow{
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.24em;
+  color:rgba(255,255,255,.84);
+}
+h1,h2,h3,h4{
+  margin:0;
+  font-family:"Oswald",sans-serif;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+}
+h1{
+  margin-top:4px;
+  font-size:clamp(2.35rem,5.6vw,4.5rem);
+  line-height:.95;
+}
+h2{font-size:1.8rem}
+h3{font-size:1.2rem;color:var(--maroon)}
+.hero-copy{
+  max-width:840px;
+}
+.hero-copy p{
+  margin:12px 0 0 0;
+  line-height:1.62;
+}
+.hero-stamp{
+  min-width:260px;
+  max-width:340px;
+  border-radius:22px;
+  padding:16px 18px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  backdrop-filter:blur(10px);
+}
+.hero-stamp .big{
+  font-family:"Oswald",sans-serif;
+  font-size:2.7rem;
+  line-height:.9;
+}
+.hero-actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+.btn,button{
+  border:0;
+  border-radius:16px;
+  padding:12px 16px;
+  cursor:pointer;
+  font-family:"Roboto",sans-serif;
+  font-size:.97rem;
+  font-weight:700;
+  transition:transform .08s ease,filter .15s ease,opacity .15s ease;
+}
+button:hover,.btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.02);
+}
+button:disabled{
+  opacity:.58;
+  cursor:not-allowed;
+  transform:none;
+}
+.btn{
+  display:inline-block;
+  text-decoration:none;
+}
+.btn-primary{background:var(--gold);color:#111827}
+.btn-secondary{background:#fff;color:#111827}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-dark{background:#111827;color:#fff}
+.btn-green{background:#169c47;color:#fff}
+.btn-yellow{background:#f0b429;color:#111827}
+.btn-red{background:#cf2635;color:#fff}
+.btn-outline{
+  background:#fff;
+  color:#111827;
+  border:1px solid var(--border);
+}
+
+.layout{
+  display:grid;
+  gap:20px;
+  grid-template-columns:1.02fr 1.38fr;
+}
+@media (max-width:1180px){
+  .layout{grid-template-columns:1fr}
+}
+.stack{
+  display:grid;
+  gap:20px;
+}
+.card{
+  overflow:hidden;
+}
+.panel{
+  background:var(--panel);
+  color:var(--ink);
+  border:1px solid var(--border);
+}
+.panel-soft{
+  background:var(--panel-soft);
+  color:var(--ink);
+  border:1px solid var(--border);
+}
+.panel-blue{
+  background:var(--blue);
+  color:#fff;
+  border:2px solid var(--blue-accent);
+}
+.panel-green{
+  background:var(--green-soft);
+  color:var(--ink);
+  border:2px solid var(--green);
+}
+.card-inner{
+  padding:22px;
+}
+.muted{
+  color:var(--muted);
+}
+.grid-2{
+  display:grid;
+  gap:16px;
+  grid-template-columns:1fr 1fr;
+}
+.grid-3{
+  display:grid;
+  gap:16px;
+  grid-template-columns:repeat(3,1fr);
+}
+@media (max-width:900px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+}
+input,textarea,select{
+  width:100%;
+  border-radius:14px;
+  border:1px solid #d7cfc2;
+  padding:12px 14px;
+  background:#fff;
+  color:#111827;
+  font-family:"Roboto",sans-serif;
+  font-size:.98rem;
+}
+textarea{
+  resize:vertical;
+  min-height:108px;
+}
+textarea.tall{min-height:154px}
+textarea.short{min-height:82px}
+label{
+  display:block;
+  margin-bottom:8px;
+  font-family:"Roboto",sans-serif;
+  font-size:.93rem;
+  font-weight:600;
+}
+.label-note{
+  display:block;
+  margin-top:6px;
+  font-size:.83rem;
+  color:#6b7280;
+  font-weight:400;
+}
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.step-list{
+  display:grid;
+  gap:12px;
+  margin-top:16px;
+}
+.step-item{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px;
+  display:grid;
+  gap:7px;
+}
+.step-head{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.step-num{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  border-radius:999px;
+  background:var(--umsl-red);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:"Roboto",sans-serif;
+  font-weight:700;
+}
+.field-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:18px;
+  display:grid;
+  gap:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,.05);
+}
+.field-title{
+  color:var(--maroon);
+  font-family:"Oswald",sans-serif;
+  font-size:1.14rem;
+  text-transform:uppercase;
+}
+.prompt{
+  margin-top:-6px;
+  color:#5b6472;
+  font-style:italic;
+  font-size:.9rem;
+  font-family:"Roboto",sans-serif;
+}
+.counter-grid{
+  display:grid;
+  gap:12px;
+  grid-template-columns:repeat(4,1fr);
+}
+@media (max-width:780px){
+  .counter-grid{grid-template-columns:repeat(2,1fr)}
+}
+.counter{
+  border-radius:18px;
+  padding:14px;
+  text-align:center;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+}
+.counter .num{
+  font-size:2rem;
+  line-height:1;
+  font-family:"Oswald",sans-serif;
+}
+.counter .label{
+  margin-top:6px;
+  font-size:.9rem;
+  font-family:"Roboto",sans-serif;
+}
+.counter.qual{background:#eef4ff;color:#0d4f8b}
+.counter.quant{background:#fff7df;color:#92400e}
+.counter.mixed{background:#f4ebff;color:#6d28d9}
+.counter.alt{background:#e8f8ee;color:#14532d}
+
+.choice-grid{
+  display:grid;
+  gap:10px;
+  grid-template-columns:repeat(2,1fr);
+}
+@media (max-width:680px){
+  .choice-grid{grid-template-columns:1fr}
+}
+.choice-btn{
+  min-height:82px;
+  text-align:left;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:4px;
+}
+.choice-btn small{
+  font-weight:400;
+  opacity:.88;
+}
+.choice-btn.active{
+  outline:3px solid rgba(13,79,139,.2);
+  border:2px solid var(--blue-accent);
+}
+.tag-wrap{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.tag{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius:999px;
+  padding:8px 12px;
+  background:#f3f4f6;
+  border:1px solid #d1d5db;
+  font-family:"Roboto",sans-serif;
+  font-size:.88rem;
+}
+.tag button{
+  padding:0;
+  border:none;
+  background:none;
+  font-size:1rem;
+  line-height:1;
+  color:#374151;
+}
+.inline-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.blueprint-shell{
+  display:grid;
+  gap:16px;
+}
+.blueprint-card{
+  background:rgba(255,255,255,.96);
+  color:var(--ink);
+  border-radius:20px;
+  padding:18px;
+  border:1px solid rgba(255,255,255,.18);
+}
+.blueprint-card h3{
+  color:var(--blue-accent);
+}
+.blueprint-card ul{
+  margin:10px 0 0 18px;
+  padding:0;
+}
+.blueprint-card li{
+  margin:0 0 8px 0;
+  line-height:1.55;
+}
+.alert-list{
+  display:grid;
+  gap:10px;
+}
+.alert{
+  border-radius:16px;
+  padding:12px 14px;
+  font-family:"Roboto",sans-serif;
+  font-size:.92rem;
+}
+.alert.warn{
+  background:#fff4db;
+  color:#7c5300;
+  border:1px solid #efc15c;
+}
+.alert.ok{
+  background:#e9f8ef;
+  color:#14532d;
+  border:1px solid #6ec28e;
+}
+.preview{
+  background:#fcfcfc;
+  color:#111827;
+  border:1px solid #d1d5db;
+  border-radius:18px;
+  padding:18px;
+  min-height:300px;
+  font-family:"Roboto",sans-serif;
+  line-height:1.72;
+}
+.preview h4{
+  margin:14px 0 8px 0;
+  font-family:"Roboto",sans-serif;
+  font-size:1rem;
+  text-transform:none;
+}
+.preview strong{font-weight:700}
+.preview em{font-style:italic;color:#4b5563}
+.identity-stamp{
+  font-family:"Roboto",sans-serif;
+  font-size:.85rem;
+  opacity:.76;
+}
+.footer{
+  text-align:center;
+  color:#d1d5db;
+  font-family:"Roboto",sans-serif;
+  font-size:.92rem;
+  padding-bottom:8px;
+}
+.small-note{
+  font-size:.84rem;
+  color:#6b7280;
+  font-family:"Roboto",sans-serif;
+}
+hr.soft{
+  border:none;
+  border-top:1px solid rgba(215,207,194,.8);
+  margin:4px 0 2px 0;
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="site-nav">
+    <div class="brand">Dr. J Teaching Tools</div>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link active" href="index.html">Tools</a>
+      <a class="nav-link" href="teaching-approach.html">Teaching Approach</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="eyebrow">Tool 03 · Research design builder</div>
+        <h1>Dr. J's <span style="color:var(--gold);">Methodology Architect</span></h1>
+        <p class="body-font">A step-by-step planning studio that helps students move from broad methodological instincts to a coherent, defensible research methodology. Build the logic of the study from approach and design all the way through sampling, data collection, quality standards, ethics, feasibility, and analysis.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#architect">Open the Architect</a>
+          <a class="btn btn-secondary" href="index.html">Back to Tools Home</a>
+        </div>
+      </div>
+      <div class="hero-stamp">
+        <div class="eyebrow">Identity stamp</div>
+        <div class="big">METHOD<br>FIRST</div>
+        <div class="small body-font" style="margin-top:10px;">Built for proposal courses, dissertation planning, methods seminars, and one-on-one doctoral coaching.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="identity-stamp">Part of the Dr. J Teaching Tools platform · v1.0</div>
+
+  <div class="layout" id="architect">
+    <div class="stack">
+      <section class="card panel-soft">
+        <div class="card-inner">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow" style="color:#6b7280;">About this tool</div>
+              <h2 style="color:var(--maroon);">What this tool is for</h2>
+            </div>
+          </div>
+          <div class="step-list">
+            <div class="step-item">
+              <div class="step-head">
+                <div class="step-num">1</div>
+                <div>
+                  <strong>Clarify the methodological lane.</strong>
+                  <div class="small-note">Choose the overall approach and the logic of inquiry that best fits the questions you are actually asking.</div>
+                </div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-head">
+                <div class="step-num">2</div>
+                <div>
+                  <strong>Name the design, not just the vibe.</strong>
+                  <div class="small-note">A solid methodology requires a recognizable design, not just “I want to interview people” or “I want to use a survey.”</div>
+                </div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-head">
+                <div class="step-num">3</div>
+                <div>
+                  <strong>Force alignment.</strong>
+                  <div class="small-note">Your questions, participants, data sources, analysis plan, and quality standards should work together instead of fighting each other.</div>
+                </div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-head">
+                <div class="step-num">4</div>
+                <div>
+                  <strong>Leave with a blueprint.</strong>
+                  <div class="small-note">Use the live blueprint to draft dissertation methods language, advisor talking points, or next-step planning notes.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel">
+        <div class="card-inner">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow" style="color:#6b7280;">Architecture snapshot</div>
+              <h2 style="color:var(--maroon);">Approach mix</h2>
+            </div>
+          </div>
+          <div class="counter-grid" style="margin-top:16px;">
+            <div class="counter qual"><div class="num" id="qualCount">0</div><div class="label">Qualitative markers</div></div>
+            <div class="counter quant"><div class="num" id="quantCount">0</div><div class="label">Quantitative markers</div></div>
+            <div class="counter mixed"><div class="num" id="mixedCount">0</div><div class="label">Mixed-methods markers</div></div>
+            <div class="counter alt"><div class="num" id="altCount">0</div><div class="label">Alternative markers</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel">
+        <div class="card-inner">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow" style="color:#6b7280;">Export</div>
+              <h2 style="color:var(--maroon);">Blueprint actions</h2>
+            </div>
+          </div>
+          <p class="body-font muted" style="margin-top:10px;">Copy the methodology blueprint, download it as a plain-text planning file, or open a printable version in a new tab.</p>
+          <div class="inline-actions" style="margin-top:12px;">
+            <button id="copyBtn" class="btn-dark">📋 Copy Blueprint</button>
+            <button id="downloadBtn" class="btn-blue">⬇ Download .txt</button>
+            <button id="printBtn" class="btn-red">🖨 Printable View</button>
+            <button id="resetBtn" class="btn-outline">↺ Reset Tool</button>
+          </div>
+          <div id="exportMsg" class="small-note" style="margin-top:12px;"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="card panel">
+        <div class="card-inner">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow" style="color:#6b7280;">Live build</div>
+              <h2 style="color:var(--maroon);">Methodology builder</h2>
+            </div>
+          </div>
+
+          <div class="stack" style="margin-top:16px;">
+            <div class="field-card">
+              <div class="field-title">Step 1 · Study framing</div>
+              <div class="prompt">Methodology decisions make more sense when the study purpose is visible. Keep this concise but real.</div>
+              <div class="grid-2">
+                <div>
+                  <label for="workingTitle">Working title</label>
+                  <input id="workingTitle" type="text" placeholder="Example: Faculty perceptions of AI and student success in higher education" />
+                </div>
+                <div>
+                  <label for="studyStage">Study stage</label>
+                  <select id="studyStage">
+                    <option value="">Select stage…</option>
+                    <option>Early topic exploration</option>
+                    <option>Proposal development</option>
+                    <option>Methodology refinement</option>
+                    <option>Dissertation draft writing</option>
+                    <option>Committee defense preparation</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label for="problemStatement">Problem statement</label>
+                  <textarea id="problemStatement" class="short" placeholder="What is the core problem or gap?"></textarea>
+                </div>
+                <div>
+                  <label for="purposeStatement">Purpose statement</label>
+                  <textarea id="purposeStatement" class="short" placeholder="What is the study intended to do?"></textarea>
+                </div>
+              </div>
+              <div>
+                <label for="researchQuestions">Research question(s)</label>
+                <textarea id="researchQuestions" placeholder="Add one research question per line."></textarea>
+              </div>
+            </div>
+
+            <div class="field-card">
+              <div class="field-title">Step 2 · Overall methodology approach</div>
+              <div class="prompt">Choose the family of methodology that actually matches the evidence you need and the claims you want to make.</div>
+              <div class="choice-grid" id="approachButtons">
+                <button class="btn-outline choice-btn" data-approach="Qualitative"><span>Qualitative</span><small>Meaning, experience, perceptions, processes, context.</small></button>
+                <button class="btn-outline choice-btn" data-approach="Quantitative"><span>Quantitative</span><small>Variables, relationships, testing, measurement, prediction.</small></button>
+                <button class="btn-outline choice-btn" data-approach="Mixed Methods"><span>Mixed Methods</span><small>Intentional integration of qualitative and quantitative strands.</small></button>
+                <button class="btn-outline choice-btn" data-approach="Alternative / Applied"><span>Alternative / Applied</span><small>Action research, evaluation, conceptual, historical, arts-based, design-based, or another form.</small></button>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label for="paradigmSelect">Worldview / paradigm / stance</label>
+                  <select id="paradigmSelect"></select>
+                </div>
+                <div>
+                  <label for="approachFit">Why does this approach fit?</label>
+                  <textarea id="approachFit" class="short" placeholder="Explain why this overall methodology matches the study."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-card">
+              <div class="field-title">Step 3 · Research design</div>
+              <div class="prompt">A design is the architecture inside the approach. Pick something recognizable enough that a committee would know what you mean.</div>
+              <div class="grid-2">
+                <div>
+                  <label for="designSelect">Primary design</label>
+                  <select id="designSelect"></select>
+                </div>
+                <div>
+                  <label for="designRationale">Design rationale</label>
+                  <textarea id="designRationale" class="short" placeholder="Why is this design the right vehicle for the study?"></textarea>
+                </div>
+              </div>
+              <div class="grid-3">
+                <div>
+                  <label for="settingField">Setting / site / context</label>
+                  <input id="settingField" type="text" placeholder="Institution, program, district, archive, community, etc." />
+                </div>
+                <div>
+                  <label for="unitField">Unit of analysis</label>
+                  <input id="unitField" type="text" placeholder="People, documents, classrooms, programs, policies…" />
+                </div>
+                <div>
+                  <label for="timeHorizon">Time horizon</label>
+                  <select id="timeHorizon">
+                    <option value="">Select horizon…</option>
+                    <option>Cross-sectional</option>
+                    <option>Longitudinal</option>
+                    <option>Retrospective</option>
+                    <option>Prospective</option>
+                    <option>Iterative cycles</option>
+                    <option>Historical span</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-card">
+              <div class="field-title">Step 4 · Participants, sources, and sampling</div>
+              <div class="prompt">Who or what will provide the evidence, and how will you justify the sample instead of just collecting what is easiest?</div>
+              <div class="grid-2">
+                <div>
+                  <label for="participantField">Participants / data sources</label>
+                  <textarea id="participantField" class="short" placeholder="Who or what is being studied?"></textarea>
+                </div>
+                <div>
+                  <label for="samplingSelect">Sampling strategy</label>
+                  <select id="samplingSelect"></select>
+                  <span class="label-note">The options shift based on the overall approach.</span>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label for="sampleSize">Sample size / corpus scope</label>
+                  <input id="sampleSize" type="text" placeholder="Example: 12 faculty participants; 200 survey responses; 15 policy documents" />
+                </div>
+                <div>
+                  <label for="sampleRationale">Sample rationale</label>
+                  <textarea id="sampleRationale" class="short" placeholder="Why is this sample sufficient, appropriate, or information-rich?"></textarea>
+                </div>
+              </div>
+              <div>
+                <label for="recruitmentPlan">Recruitment / access plan</label>
+                <textarea id="recruitmentPlan" class="short" placeholder="How will access be gained? How will participants or materials be identified and secured?"></textarea>
+              </div>
+            </div>
+
+            <div class="field-card">
+              <div class="field-title">Step 5 · Data collection and instrumentation</div>
+              <div class="prompt">Methodology gets real here. Choose what evidence will actually be gathered and how it will be gathered.</div>
+              <div class="grid-2">
+                <div>
+                  <label for="dataSourceSelect">Add data source / instrument</label>
+                  <select id="dataSourceSelect"></select>
+                </div>
+                <div style="display:flex;align-items:flex-end;">
+                  <button id="addDataSourceBtn" class="btn-blue" style="width:100%;">Add to collection plan</button>
+                </div>
+              </div>
+              <div id="dataSourceTags" class="tag-wrap"></div>
+              <div class="grid-2" style="margin-top:8px;">
+                <div>
+                  <label for="instrumentField">Instrument / protocol details</label>
+                  <textarea id="instrumentField" class="short" placeholder="Interview protocol, survey platform, observation guide, rubric, extraction matrix, etc."></textarea>
+                </div>
+                <div>
+                  <label for="procedureField">Collection procedures</label>
+                  <textarea id="procedureField" class="short" placeholder="Sequence, timing, administration, consent flow, recording, storage, and field procedures."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-card">
+              <div class="field-title">Step 6 · Quality standards and researcher stance</div>
+              <div class="prompt">Strong methods explain how quality will be established, not just what data will be collected.</div>
+              <div class="grid-2">
+                <div>
+                  <label for="qualitySelect">Primary quality strategy</label>
+                  <select id="qualitySelect"></select>
+                </div>
+                <div>
+                  <label for="qualityPlan">Quality plan</label>
+                  <textarea id="qualityPlan" class="short" placeholder="How will credibility, validity, reliability, rigor, or integration quality be addressed?"></textarea>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label for="stanceField">Researcher stance / positionality / assumptions</label>
+                  <textarea id="stanceField" class="short" placeholder="What role, assumptions, or positionality issues need to be named?"></textarea>
+                </div>
+                <div>
+                  <label for="limitationsField">Methodological limitations / delimitations</label>
+                  <textarea id="limitationsField" class="short" placeholder="What are the likely boundaries, risks, or constraints of the methodology?"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-card">
+              <div class="field-title">Step 7 · Ethics and feasibility</div>
+              <div class="prompt">A beautiful methodology that cannot get approved, accessed, or completed is not a viable methodology.</div>
+              <div class="grid-3">
+                <div>
+                  <label for="riskLevel">Human-subject risk level</label>
+                  <select id="riskLevel">
+                    <option value="">Select level…</option>
+                    <option>Likely exempt / minimal risk</option>
+                    <option>Expedited / low-to-moderate risk</option>
+                    <option>Full review may be needed</option>
+                    <option>Not sure yet</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="consentPlan">Consent / permissions plan</label>
+                  <input id="consentPlan" type="text" placeholder="Consent, assent, site permissions, archival access, etc." />
+                </div>
+                <div>
+                  <label for="timelineField">Timeline reality check</label>
+                  <input id="timelineField" type="text" placeholder="Example: 8 weeks collection; 4 weeks analysis" />
+                </div>
+              </div>
+              <div>
+                <label for="feasibilityField">Feasibility notes</label>
+                <textarea id="feasibilityField" class="short" placeholder="What resources, approvals, skill, software, or access issues could make or break this design?"></textarea>
+              </div>
+            </div>
+
+            <div class="field-card">
+              <div class="field-title">Step 8 · Data analysis plan</div>
+              <div class="prompt">Say exactly how the evidence will be analyzed. This is where vague methodology sections fall apart.</div>
+              <div class="grid-2">
+                <div>
+                  <label for="analysisSelect">Primary analysis process</label>
+                  <select id="analysisSelect"></select>
+                </div>
+                <div>
+                  <label for="analysisSoftware">Software / analytic tools</label>
+                  <input id="analysisSoftware" type="text" placeholder="NVivo, Dedoose, SPSS, R, Excel, MAXQDA, Mplus, by hand, etc." />
+                </div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label for="analysisSteps">Analysis steps</label>
+                  <textarea id="analysisSteps" placeholder="Walk through the sequence of analysis steps."></textarea>
+                </div>
+                <div>
+                  <label for="integrationPlan">Interpretation / integration plan</label>
+                  <textarea id="integrationPlan" placeholder="How will findings be interpreted, connected back to the questions, and integrated across strands if needed?"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel-blue">
+        <div class="card-inner">
+          <div class="section-title">
+            <div>
+              <div class="eyebrow">Live output</div>
+              <h2>Methodology blueprint</h2>
+            </div>
+          </div>
+          <div class="blueprint-shell" style="margin-top:16px;">
+            <div class="blueprint-card">
+              <h3>Alignment check</h3>
+              <div id="alerts" class="alert-list"></div>
+            </div>
+            <div class="blueprint-card">
+              <h3>Architect summary</h3>
+              <div id="summaryPreview" class="preview"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="footer">©2026, Joel M. Stancer, EdD</div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+
+  const banks = {
+    paradigms: {
+      "Qualitative": ["Interpretivist", "Constructivist", "Critical", "Phenomenological", "Pragmatic", "Transformative"],
+      "Quantitative": ["Post-positivist", "Positivist", "Pragmatic", "Experimental orientation"],
+      "Mixed Methods": ["Pragmatic", "Transformative", "Dialectical", "Critical mixed methods"],
+      "Alternative / Applied": ["Pragmatic", "Critical", "Constructivist", "Historical", "Design-oriented", "Other / hybrid"]
+    },
+    designs: {
+      "Qualitative": ["Case Study", "Phenomenology", "Grounded Theory", "Narrative Inquiry", "Ethnography", "Qualitative Content Analysis", "Basic Interpretive Qualitative Study", "Critical Qualitative Study"],
+      "Quantitative": ["Descriptive Survey", "Correlational", "Causal-Comparative", "Quasi-Experimental", "Experimental", "Predictive / Regression", "Secondary Data Analysis", "Instrument Development / Validation"],
+      "Mixed Methods": ["Convergent", "Explanatory Sequential", "Exploratory Sequential", "Embedded", "Multiphase", "Transformative Mixed Methods"],
+      "Alternative / Applied": ["Action Research", "Program Evaluation", "Design-Based Research", "Conceptual / Theoretical Analysis", "Historical Research", "Policy Analysis", "Arts-Based Inquiry", "Other / Hybrid Design"]
+    },
+    sampling: {
+      "Qualitative": ["Purposeful", "Criterion", "Maximum Variation", "Homogeneous", "Snowball / Chain", "Convenience", "Theoretical Sampling"],
+      "Quantitative": ["Probability Random", "Simple Random", "Stratified", "Cluster", "Systematic", "Convenience", "Census / Full population"],
+      "Mixed Methods": ["Purposeful for qualitative strand", "Probability for quantitative strand", "Parallel strand sampling", "Sequential sampling", "Multistage sampling", "Combination / mixed sampling"],
+      "Alternative / Applied": ["Purposeful", "Convenience", "Artifact / document corpus selection", "Case-based", "Census / bounded set", "Iterative cycle recruitment", "Other / hybrid"]
+    },
+    dataSources: {
+      "Qualitative": ["Interviews", "Focus Groups", "Observations", "Field Notes / Memos", "Documents / Artifacts", "Open-ended Journals", "Visual / Media Materials"],
+      "Quantitative": ["Survey / Questionnaire", "Standardized Instrument", "Administrative Dataset", "Assessment Scores", "Experimental Measure", "Observation Checklist", "Existing Database"],
+      "Mixed Methods": ["Interviews", "Focus Groups", "Observations", "Survey / Questionnaire", "Standardized Instrument", "Documents / Artifacts", "Administrative Dataset"],
+      "Alternative / Applied": ["Documents / Artifacts", "Policy Texts", "Archival Records", "Cycle Reflections", "Design Prototypes", "Implementation Logs", "Interviews", "Survey / Questionnaire"]
+    },
+    quality: {
+      "Qualitative": ["Credibility", "Trustworthiness", "Triangulation", "Member checking", "Audit trail", "Reflexive memoing", "Thick description"],
+      "Quantitative": ["Validity", "Reliability", "Internal validity", "External validity", "Statistical conclusion validity", "Instrument quality", "Assumption checking"],
+      "Mixed Methods": ["Integration quality", "Meta-inference quality", "Legitimation", "Triangulation", "Strand integrity", "Design quality"],
+      "Alternative / Applied": ["Rigor of logic", "Audit trail", "Transparency", "Utility", "Actionability", "Historical source quality", "Design trustworthiness"]
+    },
+    analysis: {
+      "Qualitative": ["Thematic Analysis", "Coding Cycles", "Constant Comparative Analysis", "Narrative Analysis", "Content Analysis", "Discourse Analysis", "Grounded Theory Analysis", "Interpretive Memoing"],
+      "Quantitative": ["Descriptive Statistics", "t tests / ANOVA", "Correlation", "Regression", "Nonparametric Tests", "Factor Analysis", "Structural Equation Modeling", "Predictive Modeling"],
+      "Mixed Methods": ["Separate strand analysis then integration", "Joint display analysis", "Connecting / building analysis", "Merged interpretation", "Data transformation", "Meta-inference development"],
+      "Alternative / Applied": ["Document Analysis", "Policy Analysis", "Historical Interpretation", "Cycle-based analysis", "Evaluation synthesis", "Pattern matching", "Comparative matrix analysis", "Design iteration analysis"]
+    }
+  };
+
+  const fields = [
+    "workingTitle","studyStage","problemStatement","purposeStatement","researchQuestions",
+    "paradigmSelect","approachFit","designSelect","designRationale","settingField","unitField","timeHorizon",
+    "participantField","samplingSelect","sampleSize","sampleRationale","recruitmentPlan",
+    "instrumentField","procedureField","qualitySelect","qualityPlan","stanceField","limitationsField",
+    "riskLevel","consentPlan","timelineField","feasibilityField","analysisSelect","analysisSoftware",
+    "analysisSteps","integrationPlan"
+  ];
+
+  const state = {
+    approach: "",
+    dataSources: []
+  };
+
+  const approachButtons = Array.from(document.querySelectorAll("[data-approach]"));
+
+  function esc(value){
+    return String(value || "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;");
+  }
+
+  function optionsHtml(list, placeholder){
+    return [`<option value="">${placeholder}</option>`]
+      .concat((list || []).map(item => `<option>${esc(item)}</option>`))
+      .join("");
+  }
+
+  function setApproach(approach){
+    state.approach = approach;
+    approachButtons.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.approach === approach);
+    });
+    $("paradigmSelect").innerHTML = optionsHtml(banks.paradigms[approach] || [], "Select paradigm / worldview…");
+    $("designSelect").innerHTML = optionsHtml(banks.designs[approach] || [], "Select design…");
+    $("samplingSelect").innerHTML = optionsHtml(banks.sampling[approach] || [], "Select sampling strategy…");
+    $("dataSourceSelect").innerHTML = optionsHtml(banks.dataSources[approach] || [], "Select data source / instrument…");
+    $("qualitySelect").innerHTML = optionsHtml(banks.quality[approach] || [], "Select quality strategy…");
+    $("analysisSelect").innerHTML = optionsHtml(banks.analysis[approach] || [], "Select analysis process…");
+    renderCounts();
+    render();
+    saveState();
+  }
+
+  function renderCounts(){
+    const counts = { qual:0, quant:0, mixed:0, alt:0 };
+    if(state.approach === "Qualitative") counts.qual += 1;
+    if(state.approach === "Quantitative") counts.quant += 1;
+    if(state.approach === "Mixed Methods") counts.mixed += 1;
+    if(state.approach === "Alternative / Applied") counts.alt += 1;
+
+    const design = $("designSelect").value;
+    const paradigm = $("paradigmSelect").value;
+    const sampling = $("samplingSelect").value;
+    const quality = $("qualitySelect").value;
+    const analysis = $("analysisSelect").value;
+    const allMarkers = [design, paradigm, sampling, quality, analysis].join(" ").toLowerCase();
+
+    if(/case|phenomen|grounded|narrative|ethnograph|qualitative|interpret|construct|critical|triangulation|coding|thematic/.test(allMarkers)) counts.qual += 1;
+    if(/survey|regression|anova|quantitative|validity|reliability|random|experimental|correlation|factor/.test(allMarkers)) counts.quant += 1;
+    if(/mixed|integration|joint display|meta-inference|strand/.test(allMarkers)) counts.mixed += 1;
+    if(/action|evaluation|historical|policy|design-based|arts|document/.test(allMarkers)) counts.alt += 1;
+
+    $("qualCount").textContent = counts.qual;
+    $("quantCount").textContent = counts.quant;
+    $("mixedCount").textContent = counts.mixed;
+    $("altCount").textContent = counts.alt;
+  }
+
+  function addDataSource(){
+    const value = $("dataSourceSelect").value;
+    if(!value) return;
+    if(!state.dataSources.includes(value)) state.dataSources.push(value);
+    renderDataSources();
+    render();
+    saveState();
+  }
+
+  function removeDataSource(value){
+    state.dataSources = state.dataSources.filter(item => item !== value);
+    renderDataSources();
+    render();
+    saveState();
+  }
+
+  function renderDataSources(){
+    const wrap = $("dataSourceTags");
+    if(!state.dataSources.length){
+      wrap.innerHTML = '<div class="small-note">No data sources or instruments added yet.</div>';
+      return;
+    }
+    wrap.innerHTML = state.dataSources.map(item => `<span class="tag">${esc(item)} <button type="button" data-remove-source="${esc(item)}">×</button></span>`).join("");
+    wrap.querySelectorAll("[data-remove-source]").forEach(btn => {
+      btn.onclick = () => removeDataSource(btn.dataset.removeSource);
+    });
+  }
+
+  function lines(text){
+    return String(text || "").split(/\n+/).map(line => line.trim()).filter(Boolean);
+  }
+
+  function alignmentAlerts(){
+    const alerts = [];
+    const qCount = lines($("researchQuestions").value).length;
+    const approach = state.approach;
+    const design = $("designSelect").value;
+    const sample = $("samplingSelect").value;
+    const analysis = $("analysisSelect").value;
+    const quality = $("qualitySelect").value;
+
+    if(!approach){
+      alerts.push({type:"warn", text:"Choose an overall methodology approach. Right now the study has no methodological lane."});
+    } else {
+      alerts.push({type:"ok", text:`Approach selected: ${approach}. Good. Now the rest of the methodology needs to align to that choice.`});
+    }
+
+    if(qCount === 0){
+      alerts.push({type:"warn", text:"Add at least one research question. Methodology without visible questions is mostly guesswork."});
+    }
+
+    if(approach && !design){
+      alerts.push({type:"warn", text:"Select a research design. A methodology family is not enough on its own."});
+    }
+
+    if(approach && !sample){
+      alerts.push({type:"warn", text:"Name the sampling strategy. Committees will want to know how participants or sources are being chosen."});
+    }
+
+    if(approach && state.dataSources.length === 0){
+      alerts.push({type:"warn", text:"Add at least one data source or instrument. The study still has no visible evidence stream."});
+    }
+
+    if(approach && !analysis){
+      alerts.push({type:"warn", text:"Select a data-analysis process. Data collection without analysis is not a methodology plan."});
+    }
+
+    if(approach && !quality){
+      alerts.push({type:"warn", text:"Add a quality strategy so rigor, trustworthiness, validity, or integration quality is visible."});
+    }
+
+    if(approach === "Mixed Methods" && state.dataSources.length < 2){
+      alerts.push({type:"warn", text:"Mixed methods usually needs evidence of two distinct strands or intentionally integrated sources. Right now that is thin."});
+    }
+
+    if(approach === "Quantitative" && !/survey|instrument|dataset|assessment|measure|database/i.test(state.dataSources.join(" "))){
+      alerts.push({type:"warn", text:"Your quantitative plan does not yet show a clear measurement source."});
+    }
+
+    if(approach === "Qualitative" && !/interview|focus|observ|field|document|journal|artifact|visual/i.test(state.dataSources.join(" "))){
+      alerts.push({type:"warn", text:"Your qualitative plan does not yet show a clear source of rich descriptive data."});
+    }
+
+    return alerts;
+  }
+
+  function buildPreviewHtml(){
+    const title = $("workingTitle").value.trim() || "Untitled study";
+    const questions = lines($("researchQuestions").value);
+    const approach = state.approach || "Not selected";
+    const paradigm = $("paradigmSelect").value || "Not selected";
+    const design = $("designSelect").value || "Not selected";
+    const sampling = $("samplingSelect").value || "Not selected";
+    const quality = $("qualitySelect").value || "Not selected";
+    const analysis = $("analysisSelect").value || "Not selected";
+
+    return `
+      <h4><strong>Study title</strong></h4>
+      <div>${esc(title)}</div>
+
+      <h4><strong>Methodology core</strong></h4>
+      <div><strong>Approach:</strong> ${esc(approach)}</div>
+      <div><strong>Paradigm / stance:</strong> ${esc(paradigm)}</div>
+      <div><strong>Design:</strong> ${esc(design)}</div>
+      <div><strong>Study stage:</strong> ${esc($("studyStage").value || "Not selected")}</div>
+
+      <h4><strong>Study logic</strong></h4>
+      <div><strong>Problem:</strong> ${esc($("problemStatement").value || "Not entered")}</div>
+      <div style="margin-top:8px;"><strong>Purpose:</strong> ${esc($("purposeStatement").value || "Not entered")}</div>
+      <div style="margin-top:8px;"><strong>Approach fit:</strong> <em>${esc($("approachFit").value || "No justification entered yet.")}</em></div>
+      <div style="margin-top:8px;"><strong>Design rationale:</strong> <em>${esc($("designRationale").value || "No design rationale entered yet.")}</em></div>
+
+      <h4><strong>Research question(s)</strong></h4>
+      <ul>
+        ${questions.length ? questions.map(q => `<li>${esc(q)}</li>`).join("") : "<li>No research questions entered yet.</li>"}
+      </ul>
+
+      <h4><strong>Context and unit of analysis</strong></h4>
+      <div><strong>Setting / site:</strong> ${esc($("settingField").value || "Not entered")}</div>
+      <div><strong>Unit of analysis:</strong> ${esc($("unitField").value || "Not entered")}</div>
+      <div><strong>Time horizon:</strong> ${esc($("timeHorizon").value || "Not selected")}</div>
+
+      <h4><strong>Participants, sources, and sampling</strong></h4>
+      <div><strong>Participants / sources:</strong> ${esc($("participantField").value || "Not entered")}</div>
+      <div><strong>Sampling strategy:</strong> ${esc(sampling)}</div>
+      <div><strong>Sample size / scope:</strong> ${esc($("sampleSize").value || "Not entered")}</div>
+      <div><strong>Sample rationale:</strong> <em>${esc($("sampleRationale").value || "Not entered")}</em></div>
+      <div style="margin-top:8px;"><strong>Recruitment / access plan:</strong> <em>${esc($("recruitmentPlan").value || "Not entered")}</em></div>
+
+      <h4><strong>Data collection and instrumentation</strong></h4>
+      <div><strong>Data sources / instruments:</strong> ${state.dataSources.length ? esc(state.dataSources.join(", ")) : "None added yet"}</div>
+      <div style="margin-top:8px;"><strong>Instrument details:</strong> <em>${esc($("instrumentField").value || "Not entered")}</em></div>
+      <div style="margin-top:8px;"><strong>Collection procedures:</strong> <em>${esc($("procedureField").value || "Not entered")}</em></div>
+
+      <h4><strong>Quality and stance</strong></h4>
+      <div><strong>Primary quality strategy:</strong> ${esc(quality)}</div>
+      <div><strong>Quality plan:</strong> <em>${esc($("qualityPlan").value || "Not entered")}</em></div>
+      <div style="margin-top:8px;"><strong>Researcher stance / positionality:</strong> <em>${esc($("stanceField").value || "Not entered")}</em></div>
+      <div style="margin-top:8px;"><strong>Methodological limitations / delimitations:</strong> <em>${esc($("limitationsField").value || "Not entered")}</em></div>
+
+      <h4><strong>Ethics and feasibility</strong></h4>
+      <div><strong>Risk level:</strong> ${esc($("riskLevel").value || "Not selected")}</div>
+      <div><strong>Consent / permissions:</strong> ${esc($("consentPlan").value || "Not entered")}</div>
+      <div><strong>Timeline:</strong> ${esc($("timelineField").value || "Not entered")}</div>
+      <div style="margin-top:8px;"><strong>Feasibility notes:</strong> <em>${esc($("feasibilityField").value || "Not entered")}</em></div>
+
+      <h4><strong>Data analysis plan</strong></h4>
+      <div><strong>Primary analysis process:</strong> ${esc(analysis)}</div>
+      <div><strong>Software / tools:</strong> ${esc($("analysisSoftware").value || "Not entered")}</div>
+      <div style="margin-top:8px;"><strong>Analysis steps:</strong> <em>${esc($("analysisSteps").value || "Not entered")}</em></div>
+      <div style="margin-top:8px;"><strong>Interpretation / integration plan:</strong> <em>${esc($("integrationPlan").value || "Not entered")}</em></div>
+    `;
+  }
+
+  function buildPlainText(){
+    const preview = $("summaryPreview");
+    return preview.innerText.replace(/\n{3,}/g, "\n\n").trim();
+  }
+
+  function renderAlerts(){
+    const wrap = $("alerts");
+    const alerts = alignmentAlerts();
+    wrap.innerHTML = alerts.map(item => `<div class="alert ${item.type}">${esc(item.text)}</div>`).join("");
+  }
+
+  function render(){
+    renderAlerts();
+    $("summaryPreview").innerHTML = buildPreviewHtml();
+    renderCounts();
+  }
+
+  function saveState(){
+    const payload = { approach: state.approach, dataSources: state.dataSources };
+    fields.forEach(id => payload[id] = $(id).value);
+    localStorage.setItem("drj_methodology_architect_state", JSON.stringify(payload));
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem("drj_methodology_architect_state");
+      if(!raw) return;
+      const payload = JSON.parse(raw);
+      fields.forEach(id => {
+        if(payload[id] !== undefined && $(id)) $(id).value = payload[id];
+      });
+      state.dataSources = Array.isArray(payload.dataSources) ? payload.dataSources : [];
+      renderDataSources();
+      if(payload.approach){
+        setApproach(payload.approach);
+      } else {
+        render();
+      }
+    }catch{
+      render();
+    }
+  }
+
+  async function copyBlueprint(){
+    const text = buildPlainText();
+    let ok = false;
+    if(navigator.clipboard && window.isSecureContext){
+      try{
+        await navigator.clipboard.writeText(text);
+        ok = true;
+      }catch{
+        ok = false;
+      }
+    }
+    if(!ok){
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try{ ok = document.execCommand("copy"); }catch{ ok = false; }
+      document.body.removeChild(ta);
+    }
+    $("exportMsg").textContent = ok ? "Blueprint copied." : "Copy did not work in this browser. Try the download or printable view.";
+  }
+
+  function downloadBlueprint(){
+    const text = buildPlainText();
+    const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "methodology_blueprint.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 500);
+    $("exportMsg").textContent = "Plain-text blueprint downloaded.";
+  }
+
+  function printableView(){
+    const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+      <meta charset="UTF-8" />
+      <title>Methodology Blueprint</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:32px;color:#111827;line-height:1.6}
+        h1,h2,h3,h4{margin:0 0 8px 0}
+        .stamp{margin-bottom:16px;color:#6b7280;font-size:14px}
+      </style>
+      </head>
+      <body>
+        <div class="stamp">Dr. J's Methodology Architect · Methodology Blueprint</div>
+        <div>${$("summaryPreview").innerHTML}</div>
+      </body>
+      </html>
+    `;
+    const win = window.open("", "_blank");
+    if(!win){
+      $("exportMsg").textContent = "Popup blocked. Allow popups for the printable view.";
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    $("exportMsg").textContent = "Printable view opened in a new tab.";
+  }
+
+  function resetTool(){
+    if(!window.confirm("Reset the Methodology Architect and clear saved progress?")) return;
+    localStorage.removeItem("drj_methodology_architect_state");
+    state.approach = "";
+    state.dataSources = [];
+    fields.forEach(id => { if($(id)) $(id).value = ""; });
+    approachButtons.forEach(btn => btn.classList.remove("active"));
+    renderDataSources();
+    $("paradigmSelect").innerHTML = optionsHtml([], "Select paradigm / worldview…");
+    $("designSelect").innerHTML = optionsHtml([], "Select design…");
+    $("samplingSelect").innerHTML = optionsHtml([], "Select sampling strategy…");
+    $("dataSourceSelect").innerHTML = optionsHtml([], "Select data source / instrument…");
+    $("qualitySelect").innerHTML = optionsHtml([], "Select quality strategy…");
+    $("analysisSelect").innerHTML = optionsHtml([], "Select analysis process…");
+    $("exportMsg").textContent = "Tool reset.";
+    render();
+  }
+
+  approachButtons.forEach(btn => {
+    btn.addEventListener("click", () => setApproach(btn.dataset.approach));
+  });
+
+  fields.forEach(id => {
+    $(id).addEventListener("input", () => { render(); saveState(); });
+    $(id).addEventListener("change", () => { render(); saveState(); });
+  });
+
+  $("addDataSourceBtn").addEventListener("click", addDataSource);
+  $("copyBtn").addEventListener("click", copyBlueprint);
+  $("downloadBtn").addEventListener("click", downloadBlueprint);
+  $("printBtn").addEventListener("click", printableView);
+  $("resetBtn").addEventListener("click", resetTool);
+
+  renderDataSources();
+  $("paradigmSelect").innerHTML = optionsHtml([], "Select paradigm / worldview…");
+  $("designSelect").innerHTML = optionsHtml([], "Select design…");
+  $("samplingSelect").innerHTML = optionsHtml([], "Select sampling strategy…");
+  $("dataSourceSelect").innerHTML = optionsHtml([], "Select data source / instrument…");
+  $("qualitySelect").innerHTML = optionsHtml([], "Select quality strategy…");
+  $("analysisSelect").innerHTML = optionsHtml([], "Select analysis process…");
+  loadState();
+})();
+</script>
+</body>
+</html>
