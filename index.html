@@ -7,7 +7,45 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Oswald:wght@400;500;600&family=Roboto:wght@400;500;700&display=swap');
     :root{--bg:#101317;--panel:#f4f0e8;--panel-soft:#f2efe9;--ink:#111827;--muted:#6b7280;--maroon:#7a0013;--maroon-dark:#5a0010;--umsl-red:#ba0c2f;--gold:#eaab00;--blue:#0b325c;--green:#166534;--border:#d7cfc2;--shadow:0 18px 34px rgba(0,0,0,.18)}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font-family:"Lora",serif}.page{max-width:1200px;margin:0 auto;padding:20px;display:grid;gap:20px}.hero,.card,.site-nav{border-radius:26px;box-shadow:var(--shadow)}.site-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#171b21;padding:14px 18px;border:1px solid rgba(255,255,255,.08)}.brand{font-family:"Oswald",sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:1.1rem}.nav-links{display:flex;gap:10px;flex-wrap:wrap}.nav-link{display:inline-block;text-decoration:none;padding:10px 14px;border-radius:14px;font-family:"Roboto",sans-serif;font-weight:700;background:#fff;color:#111827;border:1px solid var(--border)}.nav-link.active{background:var(--gold)}.hero{background:linear-gradient(90deg,var(--maroon) 0%,var(--umsl-red) 50%,#5a0010 100%);padding:28px}.eyebrow,.body-font{font-family:"Roboto",sans-serif}.eyebrow{font-size:13px;text-transform:uppercase;letter-spacing:.22em;color:rgba(255,255,255,.82)}h1,h2{margin:0;font-family:"Oswald",sans-serif;letter-spacing:.02em;text-transform:uppercase}h1{font-size:clamp(2.2rem,6vw,4rem);line-height:.95;margin-top:8px}p{line-height:1.6}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}.card{background:var(--panel);color:var(--ink);padding:22px;border:1px solid var(--border)}.card h2{font-size:1.6rem;color:var(--maroon)}.card p{font-family:"Roboto",sans-serif;color:#374151}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{display:inline-block;text-decoration:none;padding:12px 16px;border-radius:16px;font-family:"Roboto",sans-serif;font-weight:700}.btn-primary{background:var(--gold);color:#111827}.btn-secondary{background:var(--blue);color:#fff}.footer{text-align:center;color:#d1d5db;font-family:"Roboto",sans-serif;font-size:.92rem;padding-bottom:8px}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#fff;font-family:"Lora",serif}
+    .page{max-width:1240px;margin:0 auto;padding:20px;display:grid;gap:20px}
+    .site-nav,.hero,.panel{border-radius:26px;box-shadow:var(--shadow)}
+    .site-nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#171b21;padding:14px 18px;border:1px solid rgba(255,255,255,.08)}
+    .brand{font-family:"Oswald",sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:1.1rem}
+    .nav-links{display:flex;gap:10px;flex-wrap:wrap}
+    .nav-link{display:inline-block;text-decoration:none;padding:10px 14px;border-radius:14px;font-family:"Roboto",sans-serif;font-weight:700;background:#fff;color:#111827;border:1px solid var(--border)}
+    .nav-link.active{background:var(--gold)}
+    .hero{background:linear-gradient(90deg,var(--maroon) 0%,var(--umsl-red) 50%,#5a0010 100%);padding:30px;position:relative;overflow:hidden}
+    .hero:before{content:"";position:absolute;inset:0;opacity:.14;background-image:radial-gradient(circle at 20% 20%,#ffffff 0,transparent 22%),radial-gradient(circle at 80% 30%,#eaab00 0,transparent 18%),radial-gradient(circle at 80% 80%,#ffffff 0,transparent 20%)}
+    .hero-inner{position:relative;display:grid;gap:14px}
+    .eyebrow,.body-font,.meta{font-family:"Roboto",sans-serif}
+    .eyebrow{font-size:13px;text-transform:uppercase;letter-spacing:.22em;color:rgba(255,255,255,.82)}
+    h1,h2,h3{margin:0;font-family:"Oswald",sans-serif;letter-spacing:.02em;text-transform:uppercase}
+    h1{font-size:clamp(2.3rem,6vw,4.3rem);line-height:.95}
+    h2{font-size:1.8rem;color:var(--maroon)}
+    h3{font-size:1.2rem;color:var(--maroon)}
+    p{line-height:1.65}
+    .hero-copy{max-width:780px}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+    .btn{display:inline-block;text-decoration:none;padding:12px 16px;border-radius:16px;font-family:"Roboto",sans-serif;font-weight:700}
+    .btn-primary{background:var(--gold);color:#111827}
+    .btn-secondary{background:#fff;color:#111827}
+    .btn-blue{background:var(--blue);color:#fff}
+    .grid-2{display:grid;gap:20px;grid-template-columns:1.15fr .85fr}
+    .grid-3{display:grid;gap:20px;grid-template-columns:repeat(3,1fr)}
+    .grid-tools{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+    @media (max-width:980px){.grid-2,.grid-3{grid-template-columns:1fr}}
+    .panel{background:var(--panel);color:var(--ink);padding:24px;border:1px solid var(--border)}
+    .panel-soft{background:var(--panel-soft)}
+    .tool-card{display:grid;gap:10px}
+    .tool-card p,.meta{color:#374151}
+    .tool-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+    .tag{display:inline-block;background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:.85rem;font-family:"Roboto",sans-serif;color:#374151}
+    .mini-list{display:grid;gap:12px;margin-top:14px}
+    .mini-item{background:#fff;border:1px solid var(--border);border-radius:18px;padding:14px}
+    .footer{text-align:center;color:#d1d5db;font-family:"Roboto",sans-serif;font-size:.92rem;padding-bottom:8px}
   </style>
 </head>
 <body>
@@ -20,27 +58,94 @@
         <a class="nav-link" href="literature-review-lab.html">Literature Review Lab</a>
       </div>
     </nav>
+
     <section class="hero">
-      <div class="eyebrow">Dr. J Teaching Tools</div>
-      <h1>Interactive tools for doctoral thinking and research design</h1>
-      <p class="body-font">A public landing page for Dr. Joel Stancer's classroom-ready teaching tools.</p>
+      <div class="hero-inner">
+        <div class="eyebrow">Teaching portfolio hub</div>
+        <h1>Interactive teaching tools for doctoral thinking, research design, and scholarly writing</h1>
+        <p class="body-font hero-copy">This site houses classroom-ready tools designed by Dr. Joel Stancer to help students move from vague ideas to sharper questions, stronger synthesis, and more defensible research decisions.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="rqfilter.html">Open Research Question Filter</a>
+          <a class="btn btn-blue" href="literature-review-lab.html">Open Literature Review Lab</a>
+        </div>
+      </div>
     </section>
-    <section class="cards">
-      <article class="card">
-        <h2>Research Question Filter</h2>
-        <p>Use the funnel process to narrow broad ideas into a focused, defensible primary research question.</p>
-        <div class="actions">
-          <a class="btn btn-primary" href="rqfilter.html">Open Tool</a>
+
+    <section class="grid-tools">
+      <article class="panel tool-card">
+        <div>
+          <div class="eyebrow" style="color:#6b7280;">Tool 01</div>
+          <h2>Research Question Filter</h2>
+        </div>
+        <p class="body-font">A structured funnel tool that helps students sort, refine, and narrow broad ideas into a focused primary research question.</p>
+        <div class="tag-row">
+          <span class="tag">Question narrowing</span>
+          <span class="tag">Study framing</span>
+          <span class="tag">Doctoral coursework</span>
+        </div>
+        <div class="tool-actions">
+          <a class="btn btn-primary" href="rqfilter.html">Launch Tool</a>
         </div>
       </article>
-      <article class="card">
-        <h2>Literature Review Lab</h2>
-        <p>Move from annotated bibliography work to live synthesis through tagging, clustering, and guided drafting.</p>
-        <div class="actions">
-          <a class="btn btn-secondary" href="literature-review-lab.html">Open Tool</a>
+
+      <article class="panel tool-card">
+        <div>
+          <div class="eyebrow" style="color:#6b7280;">Tool 02</div>
+          <h2>Literature Review Lab</h2>
+        </div>
+        <p class="body-font">A live synthesis workspace that moves students beyond summary into tagging, clustering, drafting, and literature review decision-making.</p>
+        <div class="tag-row">
+          <span class="tag">Annotated bibliography</span>
+          <span class="tag">Synthesis</span>
+          <span class="tag">Scholarly writing</span>
+        </div>
+        <div class="tool-actions">
+          <a class="btn btn-blue" href="literature-review-lab.html">Launch Tool</a>
         </div>
       </article>
     </section>
+
+    <section class="grid-2">
+      <article class="panel panel-soft">
+        <div class="eyebrow" style="color:#6b7280;">About this site</div>
+        <h2>Built for real classroom use</h2>
+        <p class="body-font">These tools were designed to support doctoral students and advanced learners as they work through the hardest parts of research design: clarifying the study, organizing the literature, and making sharper scholarly decisions.</p>
+        <div class="mini-list">
+          <div class="mini-item"><strong>Practical:</strong> made for actual class sessions, not just demonstrations.</div>
+          <div class="mini-item"><strong>Interactive:</strong> students think, sort, revise, and synthesize in real time.</div>
+          <div class="mini-item"><strong>Portable:</strong> tools can be shared publicly and used beyond a single LMS.</div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="eyebrow" style="color:#6b7280;">Teaching use cases</div>
+        <h2>Where these tools fit</h2>
+        <div class="mini-list body-font">
+          <div class="mini-item"><strong>Dissertation-in-practice courses</strong><br>Help students narrow topics and defend a research focus.</div>
+          <div class="mini-item"><strong>Methods and proposal seminars</strong><br>Support structured thinking around frameworks, questions, and literature.</div>
+          <div class="mini-item"><strong>Writing workshops</strong><br>Move students from article notes to synthesis language they can actually use.</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid-3">
+      <article class="panel">
+        <div class="eyebrow" style="color:#6b7280;">Why it matters</div>
+        <h3>From worksheet to workflow</h3>
+        <p class="body-font">These are not static templates. They scaffold decision-making, reflection, and revision.</p>
+      </article>
+      <article class="panel">
+        <div class="eyebrow" style="color:#6b7280;">Portfolio value</div>
+        <h3>Evidence of teaching innovation</h3>
+        <p class="body-font">This site can function as a living teaching artifact for interviews, reviews, and conference presentations.</p>
+      </article>
+      <article class="panel">
+        <div class="eyebrow" style="color:#6b7280;">Version</div>
+        <h3>Platform status</h3>
+        <p class="body-font">Current public release: <strong>v1.0</strong> of the Dr. J Teaching Tools site.</p>
+      </article>
+    </section>
+
     <div class="footer">©2026, Joel M. Stancer, EdD</div>
   </div>
 </body>
