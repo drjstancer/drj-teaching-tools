@@ -76,6 +76,7 @@ Part of the Dr. J Teaching Tools platform · v1.0
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
+const STORAGE_KEY="drj_literature_review_lab_state_v1";
 const steps=["Add sources to the lab.","Move between sources and annotate deeply.","Tag sources by theme, method, framework, and population.","Mark each source: Build, Rework, or Set Aside.","Choose a synthesis mode and study the clusters.","Export your emerging literature review map."];
 const state={sources:[],selectedId:null,synthesisMode:"theme",synthesisDraft:""};
 const makeSource=p=>({id:"src_"+Math.random().toString(36).slice(2,10),shortTitle:p.shortTitle||"",authorYear:p.authorYear||"",citation:p.citation||"",keywords:p.keywords||[],status:null,isFocus:false,summary:"",argument:"",purpose:"",authorView:"",methodology:"",participants:"",findings:"",analysis:"",relevance:"",limitations:"",questions:"",quickReflection:"",tags:{themes:[],methods:[],frameworks:[],populations:[]}});
@@ -83,6 +84,43 @@ const selected=()=>state.sources.find(s=>s.id===state.selectedId)||null;
 const groups=()=>({build:state.sources.filter(s=>s.status==="build"),rework:state.sources.filter(s=>s.status==="rework"),aside:state.sources.filter(s=>s.status==="aside"),focus:state.sources.find(s=>s.isFocus)||null});
 const esc=t=>String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const uniq=a=>[...new Set(a.filter(Boolean))];
+function saveState(){
+  try{
+    const payload={
+      state,
+      sourceShortTitle:$("sourceShortTitle").value,
+      sourceAuthorYear:$("sourceAuthorYear").value,
+      sourceCitation:$("sourceCitation").value,
+      sourceKeywords:$("sourceKeywords").value,
+      reviewTitle:$("reviewTitle").value,
+      focusStatementInput:$("focusStatementInput").value
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }catch{}
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const payload=JSON.parse(raw);
+    if(payload.state){
+      state.sources=Array.isArray(payload.state.sources)?payload.state.sources:[];
+      state.selectedId=payload.state.selectedId||null;
+      state.synthesisMode=payload.state.synthesisMode||"theme";
+      state.synthesisDraft=payload.state.synthesisDraft||"";
+    }
+    $("sourceShortTitle").value=payload.sourceShortTitle||"";
+    $("sourceAuthorYear").value=payload.sourceAuthorYear||"";
+    $("sourceCitation").value=payload.sourceCitation||"";
+    $("sourceKeywords").value=payload.sourceKeywords||"";
+    $("reviewTitle").value=payload.reviewTitle||"";
+    $("focusStatementInput").value=payload.focusStatementInput||"";
+    $("synthesisMode").value=state.synthesisMode;
+  }catch{}
+}
+function clearSavedState(){
+  try{localStorage.removeItem(STORAGE_KEY);}catch{}
+}
 function promptData(mode){if(mode==="theme")return{label:"Themes",text:"What are these sources really talking about—even when they use different language?",starters:["A recurring theme across the literature is…","Several sources converge around…","An unresolved tension within this theme is…"]};if(mode==="method")return{label:"Methods",text:"How are researchers choosing to study this topic—and what does that choice make visible or invisible?",starters:["A methodological pattern across the literature suggests…","Most of these studies rely on…","A limitation of this methodological pattern is…"]};return{label:"Frameworks",text:"What lens are these authors using—and what does that lens allow, emphasize, or ignore?",starters:["Several studies are grounded in…","This framework helps explain…","A framework gap in the literature appears around…"]};}
 function buildClusters(mode){const key=mode==="theme"?"themes":mode==="method"?"methods":"frameworks";return uniq(state.sources.flatMap(s=>s.tags[key])).map(label=>({label,sources:state.sources.filter(s=>s.tags[key].includes(label))}));}
 function initSteps(){const grid=$("stepGrid");grid.innerHTML="";steps.forEach((s,i)=>{const d=document.createElement("div");d.className="step";d.innerHTML=`<div class="step-num">${i+1}</div><p class="body-font" style="margin:0;font-size:.92rem;line-height:1.45;">${esc(s)}</p>`;grid.appendChild(d);});}
@@ -100,7 +138,7 @@ function renderSynthesis(){const p=promptData(state.synthesisMode),cl=buildClust
 function sourceEntry(s){return `- ${s.shortTitle||"Untitled Source"} (${s.authorYear||"No author/year"})\n  Citation: ${s.citation||"No citation entered."}\n  Summary: ${s.summary||"No summary entered."}\n  Argument: ${s.argument||"No argument entered."}\n  Purpose/Audience: ${s.purpose||"No purpose entered."}\n  Methods / Designs / Techniques: ${s.methodology||"No methodology notes entered."}\n  Participants / Conditions: ${s.participants||"No participant notes entered."}\n  Findings: ${s.findings||"No findings entered."}\n  Analysis: ${s.analysis||"No analysis entered."}\n  Relevance: ${s.relevance||"No relevance entered."}\n  Limitations: ${s.limitations||"No limitations entered."}\n  Additional Questions: ${s.questions||"No follow-up questions entered."}\n  Status: ${s.status||"Unmarked"}\n  Themes: ${s.tags.themes.join(", ")||"None"}\n  Methods: ${s.tags.methods.join(", ")||"None"}\n  Frameworks: ${s.tags.frameworks.join(", ")||"None"}\n  Populations: ${s.tags.populations.join(", ")||"None"}\n  Reflection: ${s.quickReflection||"None"}`;}
 function buildReport(){const g=groups(),title=$("reviewTitle").value.trim()||"LITERATURE REVIEW LAB REPORT",focus=$("focusStatementInput").value.trim()||"No focus statement entered.",mode=promptData(state.synthesisMode).label,cl=buildClusters(state.synthesisMode).filter(x=>x.label&&x.sources.length);return `**${title}**\n\n**SYNTHESIS MODE:**\n${mode}\n\n**EMERGING FOCUS STATEMENT:**\n${focus}\n\n**FOCUS SOURCE:**\n${g.focus?`${g.focus.shortTitle} (${g.focus.authorYear||"No author/year"})`:"No focus source selected."}\n\n**BUILD SOURCES:**\n${g.build.length?g.build.map(sourceEntry).join("\n\n"):"None"}\n\n**REWORK SOURCES:**\n${g.rework.length?g.rework.map(sourceEntry).join("\n\n"):"None"}\n\n**SET ASIDE SOURCES:**\n${g.aside.length?g.aside.map(sourceEntry).join("\n\n"):"None"}\n\n**CLUSTERS:**\n${cl.length?cl.map(x=>`- ${x.label}: ${x.sources.map(s=>s.shortTitle||"Untitled Source").join(", ")}`).join("\n"):"No cluster data available."}\n\n**SYNTHESIS PROMPTS:**\n${promptData(state.synthesisMode).starters.map(s=>`- ${s}`).join("\n")}\n\n**SYNTHESIS DRAFT:**\n${state.synthesisDraft.trim()||"No synthesis draft entered."}`;}
 function reportHtml(text){return esc(text).replace(/^\*\*(.+?)\*\*$/gm,"<h2>$1</h2>").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\n/g,"<br />");}
-function renderReport(){$("reportPreview").innerHTML=reportHtml(buildReport());}
+function renderReport(){$("reportPreview").innerHTML=reportHtml(buildReport());saveState();}
 function copyText(text){if(navigator.clipboard&&window.isSecureContext)return navigator.clipboard.writeText(text).then(()=>true).catch(()=>fallbackCopy(text));return Promise.resolve(fallbackCopy(text));}
 function fallbackCopy(text){try{const ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.focus();ta.select();const ok=document.execCommand("copy");document.body.removeChild(ta);return ok;}catch{return false;}}
 function clearExportLinks(){const wrap=$("exportLinks");wrap.innerHTML="";}
@@ -109,6 +147,10 @@ function toRtf(text){return `{\\rtf1\\ansi\\deff0 {\\fonttbl{\\f0 Arial;}}\\f0\\
 function makePrintableHtml(text){return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Literature Review Lab Report</title><style>body{font-family:Arial,sans-serif;padding:28px;line-height:1.55;color:#111827;white-space:pre-wrap}</style></head><body>${esc(text)}</body></html>`;}
 function addSource(){const shortTitle=$("sourceShortTitle").value.trim(),authorYear=$("sourceAuthorYear").value.trim(),citation=$("sourceCitation").value.trim(),keywords=$("sourceKeywords").value.split(",").map(s=>s.trim()).filter(Boolean);if(!shortTitle&&!citation)return;const s=makeSource({shortTitle,authorYear,citation,keywords});state.sources.push(s);state.selectedId=s.id;["sourceShortTitle","sourceAuthorYear","sourceCitation","sourceKeywords"].forEach(id=>$(id).value="");render();}
 function render(){renderSourceList();renderCounts();renderEditor();renderSynthesis();renderReport();}
+$("sourceShortTitle").oninput=saveState;
+$("sourceAuthorYear").oninput=saveState;
+$("sourceCitation").oninput=saveState;
+$("sourceKeywords").oninput=saveState;
 $("addSourceBtn").onclick=addSource;
 $("synthesisMode").onchange=e=>{state.synthesisMode=e.target.value;renderSynthesis();renderReport();};
 $("statusBuildBtn").onclick=()=>setStatus("build");
@@ -129,6 +171,7 @@ $("clearDraftBtn").onclick=()=>{state.synthesisDraft="";renderSynthesis();render
 $("copyBtn").onclick=()=>copyText(buildReport()).then(ok=>{const b=$("copyBtn");b.textContent=ok?"✅ Copied":"❌ Copy Failed";setTimeout(()=>b.textContent="📋 Copy",2500);});
 $("wordBtn").onclick=()=>{try{clearExportLinks();setExportLink("Word File",toRtf(buildReport().replace(/\*\*/g,"")),"application/rtf");}catch{alert("Word export failed.");}};
 $("pdfBtn").onclick=()=>{try{clearExportLinks();setExportLink("Printable Version",makePrintableHtml(buildReport().replace(/\*\*/g,"")),"text/html");}catch{alert("PDF export fallback failed.");}};
+loadState();
 initSteps();
 render();
 })();

@@ -318,6 +318,7 @@ Part of the Dr. J Teaching Tools platform · v1.0
       "Use the synthesis panel and report to clarify the actual dissertation emerging."
     ];
 
+    const STORAGE_KEY = "drj_rqfilter_state_v1";
     const state = { questions: [], locked: false, maxKeep: 4, currentIndex: 0, customPrimary: "" };
 
     const els = {
@@ -358,6 +359,53 @@ Part of the Dr. J Teaching Tools platform · v1.0
       pdfBtn: document.getElementById("pdfBtn"),
       lockBtn: document.getElementById("lockBtn")
     };
+
+    function saveState() {
+      try {
+        const payload = {
+          state,
+          sourceText: els.sourceText.value,
+          maxKeep: els.maxKeep.value,
+          r1: els.r1.value,
+          r2: els.r2.value,
+          r3: els.r3.value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (_) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const payload = JSON.parse(raw);
+        if (typeof payload.sourceText === "string") els.sourceText.value = payload.sourceText;
+        els.loadBtn.disabled = els.sourceText.value.trim().length === 0;
+        if (payload.maxKeep !== undefined) {
+          els.maxKeep.value = payload.maxKeep;
+          state.maxKeep = Number(payload.maxKeep) || 4;
+        }
+        if (typeof payload.r1 === "string") els.r1.value = payload.r1;
+        if (typeof payload.r2 === "string") els.r2.value = payload.r2;
+        if (typeof payload.r3 === "string") els.r3.value = payload.r3;
+        if (payload.state && Array.isArray(payload.state.questions)) {
+          state.questions = payload.state.questions;
+          state.locked = Boolean(payload.state.locked);
+          state.maxKeep = Number(payload.state.maxKeep) || state.maxKeep;
+          state.currentIndex = Math.min(
+            Math.max(Number(payload.state.currentIndex) || 0, 0),
+            Math.max(payload.state.questions.length - 1, 0)
+          );
+          state.customPrimary = typeof payload.state.customPrimary === "string" ? payload.state.customPrimary : "";
+          els.customPrimary.value = state.customPrimary;
+        }
+      } catch (_) {}
+    }
+
+    function clearSavedState() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    }
+
 
     function initSteps() {
       els.stepGrid.innerHTML = "";
@@ -531,12 +579,14 @@ ${r3.trim() || "No response provided."}`;
       if (!state.questions.length) return;
       state.currentIndex = state.currentIndex === 0 ? state.questions.length - 1 : state.currentIndex - 1;
       renderQuestionArea();
+      saveState();
     }
 
     function goNext() {
       if (!state.questions.length) return;
       state.currentIndex = state.currentIndex === state.questions.length - 1 ? 0 : state.currentIndex + 1;
       renderQuestionArea();
+      saveState();
     }
 
     function copyExport() {
@@ -603,6 +653,7 @@ ${r3.trim() || "No response provided."}`;
       els.questionNotes.disabled = state.locked;
       els.primaryBtn.style.display = (q.mark === "keep" || q.mark === "maybe") ? "block" : "none";
       els.primaryBtn.disabled = state.locked;
+      saveState();
     }
 
     function renderSynthesisAndReport() {
@@ -631,6 +682,7 @@ ${r3.trim() || "No response provided."}`;
       els.r1.disabled = state.locked;
       els.r2.disabled = state.locked;
       els.r3.disabled = state.locked;
+      saveState();
     }
 
     function renderCounts() {
@@ -659,7 +711,7 @@ ${r3.trim() || "No response provided."}`;
     // 6. triggerDownload() uses a blob URL and clicks a temporary anchor.
     // 7. downloadPdf() creates a blob from jsPDF and downloads it.
 
-    els.sourceText.addEventListener("input", () => { els.loadBtn.disabled = els.sourceText.value.trim().length === 0; });
+    els.sourceText.addEventListener("input", () => { els.loadBtn.disabled = els.sourceText.value.trim().length === 0; saveState(); });
     els.loadBtn.addEventListener("click", loadDeck);
     els.maxKeep.addEventListener("input", () => { state.maxKeep = Number(els.maxKeep.value) || 4; renderCounts(); renderSynthesisAndReport(); });
     els.prevBtn.addEventListener("click", goPrev);
@@ -678,6 +730,7 @@ ${r3.trim() || "No response provided."}`;
     els.pdfBtn.addEventListener("click", downloadPdf);
     els.lockBtn.addEventListener("click", lockStudy);
 
+    loadState();
     initSteps();
     render();
   </script>
