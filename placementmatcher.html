@@ -1,13 +1,369 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Placement Matching System</title>
-<style>body{font-family:sans-serif;background:#f1f5f9}</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Placement Matching System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  </style>
 </head>
-<body>
-<h1>Placement Matching System</h1>
-<p>This is a live browser version of your model. (Full version omitted here for brevity in commit pipeline test.)</p>
+<body class="bg-slate-50 text-slate-900">
+  <div id="app"></div>
+
+  <script>
+    const schools0 = [
+      { id:"school-1", name:"Glen Iris Elementary", district:"Birmingham City", bands:["K-3"], areas:["Elementary Education"], miles:6, diverse:true, approved:true, classroom:true },
+      { id:"school-2", name:"Avondale Elementary", district:"Birmingham City", bands:["4-6"], areas:["Collaborative Special Education K-6","Elementary Education"], miles:8, diverse:true, approved:true, classroom:true },
+      { id:"school-3", name:"Huffman High School", district:"Birmingham City", bands:["6-12"], areas:["P-12 ESL","Secondary English"], miles:14, diverse:true, approved:true, classroom:true },
+      { id:"school-4", name:"Bush Hills Academy", district:"Birmingham City", bands:["P-6"], areas:["P-12 ESL","Elementary Education"], miles:7, diverse:true, approved:true, classroom:true },
+      { id:"school-5", name:"Oak Mountain Elementary", district:"Shelby County", bands:["K-3"], areas:["Elementary Education"], miles:28, diverse:false, approved:true, classroom:true }
+    ];
+
+    const teachers0 = [
+      { id:"teacher-1", name:"Monica Banks", schoolId:"school-1", area:"Elementary Education", band:"K-3", years:9, fieldMatch:true, classA:true, nbpts:false, sor:true, style:"Structured", strengths:["Classroom Management","Science of Reading","Differentiation"], willing:true, capacity:2, assigned:1 },
+      { id:"teacher-2", name:"Keisha Green", schoolId:"school-2", area:"Collaborative Special Education K-6", band:"4-6", years:12, fieldMatch:true, classA:true, nbpts:true, sor:true, style:"Balanced", strengths:["Differentiation","Classroom Management","Family Communication"], willing:true, capacity:1, assigned:0 },
+      { id:"teacher-3", name:"Luis Carter", schoolId:"school-3", area:"P-12 ESL", band:"6-12", years:7, fieldMatch:true, classA:true, nbpts:false, sor:false, style:"Autonomy-Supportive", strengths:["edTPA","Family Communication","Differentiation"], willing:true, capacity:2, assigned:0 },
+      { id:"teacher-4", name:"Asha Patel", schoolId:"school-4", area:"P-12 ESL", band:"P-6", years:5, fieldMatch:true, classA:false, nbpts:false, sor:false, style:"Balanced", strengths:["edTPA","Differentiation"], willing:true, capacity:1, assigned:0 },
+      { id:"teacher-5", name:"Rachel Sutton", schoolId:"school-5", area:"Elementary Education", band:"K-3", years:15, fieldMatch:true, classA:true, nbpts:true, sor:true, style:"Structured", strengths:["Science of Reading","Classroom Management"], willing:true, capacity:1, assigned:1 }
+    ];
+
+    const students = [
+      { id:"student-1", name:"Ari Johnson", area:"Elementary Education", stage:"Pre-Internship", online:false, preferredBand:"K-3", requiredBands:["K-3","4-6"], maxMiles:50, support:"Moderate", style:"Structured", needEdTPA:true, needMgmt:true, valueDiversity:true, history:["K-3"], relatives:["school-5"], childSites:[], conflicts:[] },
+      { id:"student-2", name:"Jordan Lee", area:"Collaborative Special Education K-6", stage:"Internship Ready", online:false, preferredBand:"4-6", requiredBands:["K-3","4-6"], maxMiles:50, support:"High", style:"Balanced", needEdTPA:false, needMgmt:true, valueDiversity:true, history:["K-3"], relatives:[], childSites:[], conflicts:[] },
+      { id:"student-3", name:"Samira Rahman", area:"P-12 ESL", stage:"Developing Practice", online:true, preferredBand:"P-6", requiredBands:["P-6","6-12"], maxMiles:999, support:"Low", style:"Autonomy-Supportive", needEdTPA:true, needMgmt:false, valueDiversity:true, history:[], relatives:[], childSites:[], conflicts:[] }
+    ];
+
+    let schools = structuredClone(schools0);
+    let teachers = structuredClone(teachers0);
+    let studentId = students[0].id;
+    let tab = "portals";
+    let teacherId = teachers[0].id;
+    let schoolId = schools[0].id;
+    let overrideId = "";
+    let confirmId = "";
+    let teacherDraft = {...teachers[0]};
+    let schoolDraft = {...schools[0]};
+
+    const questions = {
+      student:["Completed grade bands?","Preferred mentoring structure?","Main support need?","Family/child site conflicts?","Value of diverse setting?"],
+      teacher:["Available to mentor?","Mentoring style?","Strongest mentoring areas?","Class A/NBPTS?","LETRS or science-of-reading training?"],
+      school:["Approved placement setting?","Supported grade bands/areas?","Additional site requirements?","Current capacity?","Developmental strengths of site?"]
+    };
+
+    function opts() {
+      return teachers.flatMap(t => {
+        const s = schools.find(x => x.id === t.schoolId);
+        return s ? [{ id:`${s.id}:${t.id}`, school:s, teacher:t }] : [];
+      });
+    }
+
+    function check(student, option) {
+      const f = [], s = option.school, t = option.teacher;
+      if (!s.approved) f.push("School is not approved.");
+      if (!s.classroom) f.push("Approved classroom is not available.");
+      if (!t.willing) f.push("Teacher is not available/willing.");
+      if (t.years < 3) f.push("Teacher has fewer than 3 years of experience.");
+      if (!t.fieldMatch) f.push("Teacher is not teaching in the candidate field.");
+      if (!student.online && s.miles > student.maxMiles) f.push("Site exceeds distance guideline.");
+      if (student.relatives.includes(s.id)) f.push("Relative employed at placement site.");
+      if (student.childSites.includes(s.id)) f.push("Candidate child attends placement site.");
+      if (student.conflicts.includes(s.id)) f.push("Conflict flagged by OCE.");
+      if (t.assigned >= t.capacity) f.push("Teacher capacity is full.");
+      if (!s.areas.includes(student.area) && !s.areas.includes("Multiple")) f.push("School does not support candidate area.");
+      if (!(t.area === student.area || t.area === "Multiple")) f.push("Teacher area does not match candidate field.");
+      if (!student.requiredBands.includes(t.band)) f.push("Grade band does not satisfy required coverage.");
+      return { ok:f.length===0, failures:f };
+    }
+
+    function score(student, option) {
+      const hard = check(student, option);
+      if (!hard.ok) return { option, eligible:false, score:0, failures:hard.failures, breakdown:[] };
+
+      const b = [];
+      let total = 0;
+      const add = (label, points) => { total += points; b.push({label, points}); };
+      const s = option.school, t = option.teacher;
+
+      if (!student.history.includes(t.band)) add("Needed grade-band coverage", 30);
+      else if (student.preferredBand === t.band) add("Preferred grade band", 15);
+
+      if (student.style === t.style) add("Mentoring style fit", 15);
+      else if (student.support === "High" && t.style === "Structured") add("High-support/structured mentor", 10);
+
+      if (student.needEdTPA && t.strengths.includes("edTPA")) add("edTPA support", 12);
+      if (student.needMgmt && t.strengths.includes("Classroom Management")) add("Classroom management support", 12);
+      if (student.valueDiversity && s.diverse) add("Diverse setting", 10);
+      if (t.classA) add("Class A licensure", 5);
+      if (t.nbpts) add("NBPTS", 4);
+      if (["Elementary Education","Early Childhood Education","Collaborative Special Education K-6"].includes(student.area) && t.sor) add("Science-of-reading fit", 6);
+
+      const util = t.assigned / Math.max(t.capacity, 1);
+      if (util < .5) add("Mentor capacity", 6);
+      else if (util < 1) add("Mentor capacity", 3);
+
+      if (!student.online) add("Travel fit", s.miles <= 10 ? 6 : s.miles <= 25 ? 3 : 1);
+      if (["Exploration","Developing Practice"].includes(student.stage) && ["Structured","Balanced"].includes(t.style)) add("Timeline fit", 8);
+      if (student.stage === "Internship Ready" && t.style === "Autonomy-Supportive") add("Internship-ready autonomy", 6);
+
+      return { option, eligible:true, score:total, failures:[], breakdown:b };
+    }
+
+    function rank(student) {
+      return opts().map(o => score(student, o)).sort((a,b) => b.score - a.score);
+    }
+
+    function pill(text) {
+      return `<span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">${text}</span>`;
+    }
+
+    function badge(text, tone="green") {
+      const c = tone === "amber" ? "bg-amber-100 text-amber-800" : tone === "red" ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800";
+      return `<span class="rounded-full px-3 py-1 text-xs font-semibold ${c}">${text}</span>`;
+    }
+
+    function card(title, icon, desc, body) {
+      return `<section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 p-5">
+          <div class="flex items-center gap-2 text-lg font-semibold">
+            <span class="grid h-6 w-6 place-items-center rounded-full bg-emerald-100 text-xs text-emerald-800">${icon}</span>${title}
+          </div>
+          ${desc ? `<p class="mt-1 text-sm text-slate-500">${desc}</p>` : ""}
+        </div>
+        <div class="space-y-4 p-5">${body}</div>
+      </section>`;
+    }
+
+    function select(id, value, options) {
+      return `<select id="${id}" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm">${options.map(o => `<option value="${o.value}" ${o.value===value ? "selected" : ""}>${o.label}</option>`).join("")}</select>`;
+    }
+
+    function questionsBlock(type) {
+      return `<div class="space-y-2 text-sm text-slate-700">${questions[type].map(q => `<div class="rounded-xl border bg-white p-3">${q}</div>`).join("")}</div>`;
+    }
+
+    function render() {
+      const app = document.getElementById("app");
+      const student = students.find(s => s.id === studentId) || students[0];
+      const ranked = rank(student);
+      const rec = ranked.find(r => r.eligible);
+      const allOpts = opts();
+      const confirmed = allOpts.find(o => o.id === confirmId);
+      const override = allOpts.find(o => o.id === overrideId);
+      const chosen = override || confirmed || (rec && rec.option);
+      const payload = chosen ? {
+        studentId: student.id,
+        studentName: student.name,
+        certificationArea: student.area,
+        stage: student.stage,
+        selectedSchoolId: chosen.school.id,
+        schoolName: chosen.school.name,
+        teacherId: chosen.teacher.id,
+        cooperatingTeacher: chosen.teacher.name,
+        gradeBand: chosen.teacher.band,
+        district: chosen.school.district,
+        matchSource: override ? "manual_override" : confirmed ? "human_confirmed" : "algorithmic_recommendation",
+        requiresHumanReview: !(confirmed || override)
+      } : null;
+
+      let body = "";
+
+      if (tab === "portals") {
+        body = `<div class="grid gap-6 lg:grid-cols-3">
+          ${card("Student Portal","S","Select student profile used by the engine.",`
+            <label class="block text-sm font-medium">Student
+              ${select("studentSelect", studentId, students.map(s => ({value:s.id,label:`${s.name} — ${s.area}`})))}
+            </label>
+            <div class="rounded-2xl border bg-slate-50 p-4">
+              <b>${student.name}</b>
+              <p class="text-sm text-slate-500">${student.area} • ${student.stage}</p>
+              <div class="mt-3 flex flex-wrap gap-2">${pill("Support: " + student.support)}${pill("Style: " + student.style)}${pill("Band: " + student.preferredBand)}</div>
+            </div>
+            ${questionsBlock("student")}
+          `)}
+          ${card("Teacher Portal","T","Teacher selects school from the approved list and can update later.",`
+            <label class="block text-sm font-medium">Teacher
+              ${select("teacherSelect", teacherId, teachers.map(t => ({value:t.id,label:t.name})))}
+            </label>
+            <label class="block text-sm font-medium">Teacher Name
+              <input id="teacherName" class="mt-2 w-full rounded-xl border px-3 py-2 text-sm" value="${teacherDraft.name}">
+            </label>
+            <label class="block text-sm font-medium">School from approved list
+              ${select("teacherSchool", teacherDraft.schoolId, schools.map(s => ({value:s.id,label:`${s.name} — ${s.district}`})))}
+            </label>
+            <label class="block text-sm font-medium">Mentoring Style
+              ${select("teacherStyle", teacherDraft.style, ["Structured","Balanced","Autonomy-Supportive"].map(s => ({value:s,label:s})))}
+            </label>
+            <label class="flex gap-2 text-sm"><input id="teacherWilling" type="checkbox" ${teacherDraft.willing ? "checked" : ""}>Willing to mentor</label>
+            <button id="saveTeacher" class="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white">Save teacher profile</button>
+            ${questionsBlock("teacher")}
+          `)}
+          ${card("School Portal","P","School admin/designee or OCE maintains approved sites.",`
+            <label class="block text-sm font-medium">School
+              ${select("schoolSelect", schoolId, schools.map(s => ({value:s.id,label:s.name})))}
+            </label>
+            <label class="block text-sm font-medium">School Name
+              <input id="schoolName" class="mt-2 w-full rounded-xl border px-3 py-2 text-sm" value="${schoolDraft.name}">
+            </label>
+            <label class="block text-sm font-medium">District
+              <input id="schoolDistrict" class="mt-2 w-full rounded-xl border px-3 py-2 text-sm" value="${schoolDraft.district}">
+            </label>
+            <label class="flex gap-2 text-sm"><input id="schoolApproved" type="checkbox" ${schoolDraft.approved ? "checked" : ""}>Approved placement site</label>
+            <label class="flex gap-2 text-sm"><input id="schoolClassroom" type="checkbox" ${schoolDraft.classroom ? "checked" : ""}>Approved classroom available</label>
+            <button id="saveSchool" class="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white">Save school profile</button>
+            ${questionsBlock("school")}
+          `)}
+        </div>`;
+      }
+
+      if (tab === "matching") {
+        body = `<div class="grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
+          ${card("Matching Logic","M","Hard constraints first, fit scoring second.",`
+            <div class="rounded-2xl border p-4"><b>Hard constraints</b>
+              <ul class="mt-2 list-disc pl-5 text-sm"><li>Approved school/classroom</li><li>3+ years teaching</li><li>Field and grade-band match</li><li>Distance and conflict checks</li><li>Available mentor capacity</li></ul>
+            </div>
+            <div class="rounded-2xl border p-4"><b>Fit variables</b>
+              <ul class="mt-2 list-disc pl-5 text-sm"><li>Timeline stage</li><li>Mentoring style</li><li>edTPA and classroom-management support</li><li>Diverse setting</li><li>Advanced credentials</li></ul>
+            </div>
+          `)}
+          ${card("Match Results","R","Human confirmation remains required.",`
+            ${rec ? `<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <div class="flex justify-between gap-4">
+                <div><p class="text-sm uppercase tracking-wide text-emerald-700">Top recommendation</p><h3 class="text-xl font-semibold">${rec.option.school.name} — ${rec.option.teacher.name}</h3><p class="text-sm text-slate-600">${rec.option.teacher.band} • ${rec.option.school.district}</p></div>
+                ${badge("Score " + rec.score)}
+              </div>
+            </div>` : ""}
+            <div class="space-y-3">${ranked.map(r => `<div class="rounded-2xl border bg-white p-4">
+              <div class="flex justify-between gap-4">
+                <div><b>${r.option.school.name}</b><p class="text-sm text-slate-500">${r.option.teacher.name} • ${r.option.teacher.band}</p></div>
+                ${badge(r.eligible ? `Eligible • ${r.score}` : "Blocked", r.eligible ? "green" : "amber")}
+              </div>
+              ${r.eligible ? `<div class="mt-3 grid gap-2 text-sm">${r.breakdown.map(b => `<div class="flex justify-between rounded-xl bg-slate-50 px-3 py-2"><span>${b.label}</span><b>+${b.points}</b></div>`).join("")}</div>` : `<ul class="mt-3 list-disc pl-5 text-sm text-amber-900">${r.failures.map(f => `<li>${f}</li>`).join("")}</ul>`}
+            </div>`).join("")}</div>
+            <label class="block text-sm font-medium">Manual override
+              ${select("overrideSelect", overrideId || "none", [{value:"none",label:"No override"}, ...allOpts.map(o => ({value:o.id,label:`${o.school.name} — ${o.teacher.name}`}))])}
+            </label>
+            <div class="flex flex-wrap gap-3">
+              ${rec ? `<button id="confirmRec" class="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-medium text-white">Confirm recommendation</button>` : ""}
+              <button id="clearConfirm" class="rounded-xl border bg-white px-4 py-2 text-sm font-medium">Clear confirmation</button>
+            </div>
+          `)}
+        </div>`;
+      }
+
+      if (tab === "integration") {
+        body = card("Feed into Compliance / Tracking System","D","Payload sent after review or pending review.",
+          `<pre class="overflow-auto rounded-2xl bg-slate-950 p-4 text-sm text-slate-100">${JSON.stringify(payload, null, 2)}</pre>`);
+      }
+
+      if (tab === "tests") {
+        const all = opts();
+        const bySchool = id => all.find(o => o.school.id === id);
+        const tests = [
+          ["Blocks relative-conflict school", !check(students[0], bySchool("school-5")).ok],
+          ["Allows compatible SPED placement", check(students[1], bySchool("school-2")).ok],
+          ["Blocks wrong certification area", !check(students[1], bySchool("school-1")).ok],
+          ["Returns an eligible match", rank(students[1]).some(r => r.eligible)],
+          ["Allows compatible online P-12 ESL", check(students[2], bySchool("school-3")).ok]
+        ];
+        body = card("Matching Logic Self-Tests","✓","Lightweight validation checks.",
+          tests.map(t => `<div class="mb-3 flex justify-between rounded-2xl border bg-white p-4"><span>${t[0]}</span>${badge(t[1] ? "Passed" : "Failed", t[1] ? "green" : "red")}</div>`).join(""));
+      }
+
+      app.innerHTML = `<main class="mx-auto max-w-7xl space-y-6 p-6 md:p-8">
+        <section class="rounded-3xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-green-700 p-8 text-white shadow-lg">
+          <p class="text-sm uppercase tracking-[0.18em] text-emerald-100">Interview Demo Model</p>
+          <h1 class="mt-2 text-3xl font-semibold md:text-4xl">Placement Matching System</h1>
+          <p class="mt-3 max-w-4xl text-sm text-emerald-50/95 md:text-base">Linked student, teacher, and school portals feed a matching engine. Recommendations remain editable and human-confirmable before feeding the compliance tracker.</p>
+        </section>
+
+        <section class="grid gap-4 md:grid-cols-4">
+          ${[["School profiles", schools.length],["Teacher profiles", teachers.length],["Eligible matches", ranked.filter(r => r.eligible).length],["Decision state", chosen ? "Selected" : "Pending"]].map(x => `<div class="rounded-2xl border bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">${x[0]}</p><p class="text-3xl font-semibold">${x[1]}</p></div>`).join("")}
+        </section>
+
+        <nav class="flex flex-wrap gap-2 rounded-2xl bg-white p-2 shadow-sm">
+          ${["portals","matching","integration","tests"].map(t => `<button data-tab="${t}" class="rounded-xl px-4 py-2 text-sm font-medium capitalize ${tab===t ? "bg-emerald-700 text-white" : "text-slate-700 hover:bg-slate-100"}">${t}</button>`).join("")}
+        </nav>
+
+        ${body}
+      </main>`;
+
+      bind();
+    }
+
+    function bind() {
+      document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tab = b.dataset.tab; render(); });
+
+      const studentSelect = document.getElementById("studentSelect");
+      if (studentSelect) studentSelect.onchange = e => { studentId = e.target.value; confirmId = ""; overrideId = ""; render(); };
+
+      const teacherSelect = document.getElementById("teacherSelect");
+      if (teacherSelect) teacherSelect.onchange = e => {
+        teacherId = e.target.value;
+        teacherDraft = {...teachers.find(t => t.id === teacherId)};
+        render();
+      };
+
+      const teacherSchool = document.getElementById("teacherSchool");
+      if (teacherSchool) teacherSchool.onchange = e => teacherDraft.schoolId = e.target.value;
+
+      const teacherName = document.getElementById("teacherName");
+      if (teacherName) teacherName.oninput = e => teacherDraft.name = e.target.value;
+
+      const teacherStyle = document.getElementById("teacherStyle");
+      if (teacherStyle) teacherStyle.onchange = e => teacherDraft.style = e.target.value;
+
+      const teacherWilling = document.getElementById("teacherWilling");
+      if (teacherWilling) teacherWilling.onchange = e => teacherDraft.willing = e.target.checked;
+
+      const saveTeacher = document.getElementById("saveTeacher");
+      if (saveTeacher) saveTeacher.onclick = () => {
+        teachers = teachers.map(t => t.id === teacherDraft.id ? {...teacherDraft, updated:"Today"} : t);
+        render();
+      };
+
+      const schoolSelect = document.getElementById("schoolSelect");
+      if (schoolSelect) schoolSelect.onchange = e => {
+        schoolId = e.target.value;
+        schoolDraft = {...schools.find(s => s.id === schoolId)};
+        render();
+      };
+
+      const schoolName = document.getElementById("schoolName");
+      if (schoolName) schoolName.oninput = e => schoolDraft.name = e.target.value;
+
+      const schoolDistrict = document.getElementById("schoolDistrict");
+      if (schoolDistrict) schoolDistrict.oninput = e => schoolDraft.district = e.target.value;
+
+      const schoolApproved = document.getElementById("schoolApproved");
+      if (schoolApproved) schoolApproved.onchange = e => schoolDraft.approved = e.target.checked;
+
+      const schoolClassroom = document.getElementById("schoolClassroom");
+      if (schoolClassroom) schoolClassroom.onchange = e => schoolDraft.classroom = e.target.checked;
+
+      const saveSchool = document.getElementById("saveSchool");
+      if (saveSchool) saveSchool.onclick = () => {
+        schools = schools.map(s => s.id === schoolDraft.id ? {...schoolDraft} : s);
+        render();
+      };
+
+      const overrideSelect = document.getElementById("overrideSelect");
+      if (overrideSelect) overrideSelect.onchange = e => { overrideId = e.target.value === "none" ? "" : e.target.value; render(); };
+
+      const confirmRec = document.getElementById("confirmRec");
+      if (confirmRec) confirmRec.onclick = () => {
+        const student = students.find(s => s.id === studentId);
+        const rec = rank(student).find(r => r.eligible);
+        confirmId = rec ? rec.option.id : "";
+        render();
+      };
+
+      const clearConfirm = document.getElementById("clearConfirm");
+      if (clearConfirm) clearConfirm.onclick = () => { confirmId = ""; render(); };
+    }
+
+    render();
+  </script>
 </body>
 </html>
