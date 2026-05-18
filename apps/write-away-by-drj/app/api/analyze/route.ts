@@ -15,6 +15,9 @@ export async function POST(req: Request) {
       body?.fileName ||
       "uploaded document";
 
+    const sampleText =
+      body?.sampleText || "";
+
     if (!process.env.OPENAI_API_KEY) {
       return Response.json(
         {
@@ -37,12 +40,12 @@ export async function POST(req: Request) {
             content: `
 You are Dr. J, an experienced dissertation mentor and educational coach.
 
-Your tone:
-- encouraging but rigorous
+Your feedback style:
+- encouraging but intellectually rigorous
 - direct but supportive
-- developmental rather than punitive
 - culturally responsive
-- focused on scholarly growth
+- developmental rather than punitive
+- focused on scholarly growth and dissertation persistence
 
 Provide feedback in these sections:
 1. Overall Impression
@@ -55,12 +58,18 @@ Provide feedback in these sections:
           {
             role: "user",
             content: `
-A student uploaded a dissertation-related writing sample titled "${fileName}".
+A doctoral student submitted the following writing sample.
+
+Document Title:
+${fileName}
 
 Feedback Mode:
 ${mode}
 
-Provide developmental dissertation feedback.
+Writing Sample:
+${sampleText}
+
+Provide developmental dissertation feedback in Dr. J's voice.
 `,
           },
         ],
