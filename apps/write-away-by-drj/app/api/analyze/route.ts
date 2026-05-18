@@ -81,18 +81,19 @@ Provide developmental dissertation feedback in Dr. J's voice.
       feedback:
         completion.choices[0].message.content,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+  console.error(error);
 
-    return Response.json(
-      {
-        success: false,
-        error:
-          "Unable to generate feedback.",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+  return Response.json(
+    {
+      success: false,
+      error:
+        error?.message ||
+        "Unknown OpenAI error.",
+    },
+    {
+      status: 500,
+    }
+  );
+}
 }
