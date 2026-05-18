@@ -7,69 +7,116 @@ export default function UploadForm() {
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState("Dr. J Coaching");
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!file) return;
+    if (!file) {
+      setError("Please upload a .docx or .pdf file.");
+      return;
+    }
 
     setLoading(true);
+    setError("");
+    setFeedback("");
 
-    const formData = new FormData();
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          mode,
+        }),
+      });
 
-    formData.append("file", file);
-    formData.append("mode", mode);
+      const data = await response.json();
 
-    const response = await fetch("/api/analyze", {
-      method: "POST",
-      body: formData,
-    });
+      if (!response.ok) {
+        throw new Error(data?.error || "Something went wrong.");
+      }
 
-    const data = await response.json();
-
-    setFeedback(data.feedback);
-    setLoading(false);
+      setFeedback(data.feedback);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to review document."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="space-y-8">
       <form
         onSubmit={handleSubmit}
-        className="border rounded-2xl p-6 shadow-sm space-y-4"
+        className="border border-neutral-200 rounded-3xl p-8 shadow-sm bg-white space-y-6"
       >
-        <input
-          type="file"
-          accept=".pdf,.docx"
-          onChange={(e) =>
-            setFile(e.target.files?.[0] || null)
-          }
-          className="block w-full"
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-semibold tracking-wide uppercase text-neutral-500">
+            Dissertation Upload
+          </label>
 
-        <select
-          value={mode}
-          onChange={(e) => setMode(e.target.value)}
-          className="border rounded-lg p-3 w-full"
-        >
-          <option>Dissertation Structure</option>
-          <option>Academic Tone</option>
-          <option>APA Alignment</option>
-          <option>Literature Review Strength</option>
-          <option>Research Question Alignment</option>
-          <option>Dr. J Coaching</option>
-        </select>
+          <input
+            type="file"
+            accept=".pdf,.docx"
+            onChange={(e) =>
+              setFile(e.target.files?.[0] || null)
+            }
+            className="block w-full border border-neutral-200 rounded-xl p-4"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-semibold tracking-wide uppercase text-neutral-500">
+            Feedback Mode
+          </label>
+
+          <select
+            value={mode}
+            onChange={(e) => setMode(e.target.value)}
+            className="border border-neutral-200 rounded-xl p-4 w-full"
+          >
+            <option>Dissertation Structure</option>
+            <option>Academic Tone</option>
+            <option>APA Alignment</option>
+            <option>Literature Review Strength</option>
+            <option>Research Question Alignment</option>
+            <option>Dr. J Coaching</option>
+          </select>
+        </div>
 
         <button
           type="submit"
-          className="bg-black text-white px-6 py-3 rounded-xl"
+          disabled={loading}
+          className="bg-black text-white px-8 py-4 rounded-2xl font-medium hover:opacity-90 transition disabled:opacity-50"
         >
-          {loading ? "Reviewing..." : "Review Writing"}
+          {loading ? "Reviewing Writing..." : "Review Writing"}
         </button>
       </form>
 
+      {error && (
+        <div className="border border-red-200 bg-red-50 text-red-700 rounded-2xl p-6">
+          {error}
+        </div>
+      )}
+
       {feedback && (
-        <div className="border rounded-2xl p-6 whitespace-pre-wrap shadow-sm">
-          {feedback}
+        <div className="border border-neutral-200 rounded-3xl p-8 whitespace-pre-wrap shadow-sm bg-white space-y-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-neutral-500 font-semibold">
+              Feedback Response
+            </p>
+          </div>
+
+          <div className="text-neutral-800 leading-8">
+            {feedback}
+          </div>
         </div>
       )}
     </div>
